@@ -103,14 +103,12 @@ bool FiniteAutomata::readAutomataFromFile(const string& filename) {
             }
             else if (insideTransitionFunction && file.peek() == EOF) {
                 insideTransitionFunction = false;
-                string transitionText = transitionBuffer.str();
-                istringstream transitionLine(transitionText);
 
                 int fromState;
                 char symbol;
                 int toState;
 
-                while (transitionLine >> fromState >> symbol >> toState) {
+                while (transitionBuffer >> fromState >> symbol >> toState) {
                     this->transitionFunction[fromState][symbol] = toState;
                 }
             }
@@ -145,7 +143,6 @@ bool FiniteAutomata::processInput(char input) {
     cout << prevState << ' ' << input << ' ' << this->currentState << endl;
     return true;
 }
-
 
 vector<PredecessorInfo> FiniteAutomata::bfsSearch() {
     queue<int> statesQueue;
@@ -188,10 +185,9 @@ vector<PredecessorInfo> FiniteAutomata::bfsSearch() {
     {
         PredecessorInfo finale = { finaleState, '.' };
         path.push_back(finale);
-        int currentState = finaleState;
-        while (currentState != startState) {
-            path.push_back(predecessors[currentState]);
-            currentState = predecessors[currentState].prevState;
+        while (finaleState != startState) {
+            path.push_back(predecessors[finaleState]);
+            finaleState = predecessors[finaleState].prevState;
         }
 
         reverse(path.begin(), path.end()); // Reverse the path so that it starts with startState
@@ -199,8 +195,6 @@ vector<PredecessorInfo> FiniteAutomata::bfsSearch() {
 
     return path;
 }
-
-
 
 int main() {
     FiniteAutomata automata;
@@ -223,7 +217,7 @@ int main() {
             }
         }
         else {
-            std::cout << "ѕуть от состо€ни€ " << automata.getCurrentState() << " до конечного состо€ни€ не найден." << std::endl;
+            std::cout << "The path from state " << automata.getCurrentState() << " to the final state was not found." << std::endl;
         }
     }
     else {
