@@ -4,11 +4,12 @@
 #include <vector>
 #include <unordered_map>
 #include <queue>
+#include <string>
 using namespace std;
 
 #define NONE -999
 
-// Структура для хранения информации о предшественниках
+// Structure for storing information about predecessors
 struct PredecessorInfo {
     int prevState;
     char inputSymbol;
@@ -24,9 +25,9 @@ private:
     unordered_map<int, unordered_map<char, int>> transitionFunction;
 public:
     bool readAutomataFromFile(const string& filename);
-    // Метод для обработки входных символов и изменения состояния
+    // Method for processing input characters and changing state
     bool processInput(char input);
-    // Функция для выполнения поиска в ширину
+    // Function to perform breadth first search
     vector<PredecessorInfo> bfsSearch();
 
     int getCurrentState();
@@ -48,19 +49,19 @@ int FiniteAutomata::getCurrentState() { return this->currentState; }
 bool FiniteAutomata::readAutomataFromFile(const string& filename) {
     ifstream file(filename);
     if (!file.is_open()) {
-        return false; // Ошибка при открытии файла
+        return false; // Error opening file
     }
 
     string line;
-    bool insideTransitionFunction = false; // Флаг для определения, находимся ли внутри TransitionFunction
-    stringstream transitionBuffer; // Буфер для объединения строк внутри TransitionFunction
+    bool insideTransitionFunction = false; // Flag to determine if we are inside a TransitionFunction
+    stringstream transitionBuffer; // Buffer for concatenating strings inside TransitionFunction
 
     while (getline(file, line)) {
         istringstream iss(line);
         string key;
 
         if (iss >> key) {
-#pragma region reading: InputSymbols, StatesOfAutomata, InitialState, FinalStates
+ #pragma region reading: InputSymbols, StatesOfAutomata, InitialState, FinalStates
             if (key == "InputSymbols=") {
                 char symbol;
                 while (iss >> symbol) {
@@ -126,13 +127,13 @@ bool FiniteAutomata::readAutomataFromFile(const string& filename) {
 }
 
 bool FiniteAutomata::processInput(char input) {
-    // Проверка наличия входного символа в алфавите
+    // Checking the presence of an input character in the alphabet
     if (!contains(this->inputSymbols, input)) /*find(this->inputSymbols.begin(), this->inputSymbols.end(), input) == this->inputSymbols.end()*/
     {
         cout << "There are no '" << input << "' symbols in the input symbol set." << endl;
         return false;
     }
-    // Проверяем наличие ключей перед извлечением из функции перехода
+    // Checking for the presence of keys before extracting from the switching function
     if (this->transitionFunction.find(this->currentState) == this->transitionFunction.end() ||
         this->transitionFunction[this->currentState].find(input) == this->transitionFunction[this->currentState].end()) {
         cout << "The transition for the current state '" << this->currentState <<"' with input symbol '" << input << "' is not defined." << endl;
@@ -149,7 +150,7 @@ bool FiniteAutomata::processInput(char input) {
 vector<PredecessorInfo> FiniteAutomata::bfsSearch() {
     queue<int> statesQueue;
     vector<int> visitedStates;
-    unordered_map<int, PredecessorInfo> predecessors; // Хранит информацию о предшественниках
+    unordered_map<int, PredecessorInfo> predecessors; // Stores information about predecessors
     int finaleState = NONE, startState = this->currentState;
 
     statesQueue.push(this->currentState);
@@ -160,28 +161,28 @@ vector<PredecessorInfo> FiniteAutomata::bfsSearch() {
 
         if (contains(this->finalStates, this->currentState)) /*find(this->finalStates.begin(), this->finalStates.end(), this->currentState) != this->finalStates.end()*/
         {
-            // Достигнуто финальное состояние
+            // Final state reached
             finaleState = this->currentState;
             break;
         }
 
         visitedStates.push_back(currentState);
 
-        // Перебор всех символов в функции переходов из текущего состояния
+        // Enumerating all symbols in the function of transitions from the current state
         for (const auto& transition : this->transitionFunction[currentState]) {
             char inputSymbol = transition.first;
             int nextState = transition.second;
 
             if (!contains(visitedStates, nextState)) {
-                // Следующее состояние не было посещено
+                // The following state has not been visited
                 statesQueue.push(nextState);
-                // Сохраняем информацию о предшественнике
+                // Saving information about the predecessor
                 predecessors[nextState] = { currentState, inputSymbol };
             }
         }
     }
 
-    // Восстанавливаем путь от endState к startState
+    // Restoring the path from endState to startState
     vector<PredecessorInfo> path;
     if (finaleState != NONE)
     {
@@ -193,7 +194,7 @@ vector<PredecessorInfo> FiniteAutomata::bfsSearch() {
             currentState = predecessors[currentState].prevState;
         }
 
-        reverse(path.begin(), path.end()); // Переворачиваем путь, чтобы он начинался с startState
+        reverse(path.begin(), path.end()); // Reverse the path so that it starts with startState
     }
 
     return path;
@@ -212,7 +213,7 @@ int main() {
         {
             if (!automata.processInput(symbol)) { return 0; }
         }
-        cout << "--------------------------------------------" << endl;
+        cout << "------------------------------------------" << endl;
 
         vector<PredecessorInfo> path = automata.bfsSearch();
 
