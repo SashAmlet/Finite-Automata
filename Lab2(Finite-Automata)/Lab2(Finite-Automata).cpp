@@ -6,6 +6,8 @@
 #include <queue>
 using namespace std;
 
+#define NONE -999
+
 // Структура для хранения информации о предшественниках
 struct PredecessorInfo {
     int prevState;
@@ -148,7 +150,7 @@ vector<PredecessorInfo> FiniteAutomata::bfsSearch() {
     queue<int> statesQueue;
     vector<int> visitedStates;
     unordered_map<int, PredecessorInfo> predecessors; // Хранит информацию о предшественниках
-    int finaleState = this->currentState, startState = this->currentState;
+    int finaleState = NONE, startState = this->currentState;
 
     statesQueue.push(this->currentState);
 
@@ -181,13 +183,18 @@ vector<PredecessorInfo> FiniteAutomata::bfsSearch() {
 
     // Восстанавливаем путь от endState к startState
     vector<PredecessorInfo> path;
-    int currentState = finaleState;
-    while (currentState != startState) {
-        path.push_back(predecessors[currentState]);
-        currentState = predecessors[currentState].prevState;
-    }
+    if (finaleState != NONE)
+    {
+        PredecessorInfo finale = { finaleState, '.' };
+        path.push_back(finale);
+        int currentState = finaleState;
+        while (currentState != startState) {
+            path.push_back(predecessors[currentState]);
+            currentState = predecessors[currentState].prevState;
+        }
 
-    reverse(path.begin(), path.end()); // Переворачиваем путь, чтобы он начинался с startState
+        reverse(path.begin(), path.end()); // Переворачиваем путь, чтобы он начинался с startState
+    }
 
     return path;
 }
@@ -200,7 +207,7 @@ int main() {
     cin >> inputStr;
     const vector<char> w0(inputStr.begin(), inputStr.end());
 
-    if (automata.readAutomataFromFile("test.txt")) {
+    if (automata.readAutomataFromFile("test2.txt")) {
         for (char symbol : w0)
         {
             if (!automata.processInput(symbol)) { return 0; }
