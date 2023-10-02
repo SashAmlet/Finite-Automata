@@ -199,7 +199,8 @@ vector<PredecessorInfo> FiniteAutomata::bfsSearch() {
 int main() {
     FiniteAutomata automata;
     string inputStr;
-    cin >> inputStr;
+    //cin >> inputStr;
+    getline(cin, inputStr);
     const vector<char> w0(inputStr.begin(), inputStr.end());
 
     if (automata.readAutomataFromFile("test2.txt")) {
